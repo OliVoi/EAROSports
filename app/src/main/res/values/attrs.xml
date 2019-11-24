@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="StatusBarView">
+        <attr name="action_text" format="string"/>
+        <attr name="action_icon_left" format="reference"/>
+        <attr name="action_icon_right" format="reference"/>
+        <attr name="action_height" format="dimension"/>
+    </declare-styleable>
+</resources>

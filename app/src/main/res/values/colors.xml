@@ -3,4 +3,27 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="white_trans">#99FFFFFF</color>
+
+    <color name="tab_unselect">#3E3E58</color>
+    <color name="tab_select">#2CC197</color>
+    <color name="color_border">#E5ECED</color>
+    <color name="color_textview_default">#342A2A</color>
+    <color name="color_bgr_login">#F5A623</color>
+    <color name="color_divider">#E5E5E5</color>
+    <color name="color_border_ecommerce">#B2C0D7</color>
+    <color name="color_bgr_home">#F5F5F5</color>
+    <color name="color_line">#D8D8D8</color>
+    <color name="bgr_topbar">#58CDB9</color>
+    <color name="tablayout_unselected">#9B9FA5</color>
+    <color name="item_viettelpost_selected">#42BEB4</color>
+    <color name="order_number">#336EA1</color>
+    <color name="tv_left_button">#666666</color>
+    <color name="title_status_dialog">#565C64</color>
+    <color name="bgr_topbar_status_dialog">#F6F8FF</color>
+    <color name="status_all">#237BD3</color>
+    <color name="startColorPrimary">#37B6B1</color>
+    <color name="bgr_search_home">#37A29B</color>
 </resources>
