@@ -12,4 +12,22 @@
         <item name="android:background">?attr/selectableItemBackground</item>
     </style>
 
+    <style name="DialogAnimationUpDown">
+        <item name="android:windowEnterAnimation">@anim/push_up_in</item>
+        <item name="android:windowExitAnimation">@anim/push_down_out</item>
+    </style>
+
+    <style name="ThemeTranslucentNoStatus" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/startColorPrimary</item>
+        <item name="colorPrimaryDark">@color/startColorPrimary</item>
+        <item name="colorAccent">@color/startColorPrimary</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
 </resources>

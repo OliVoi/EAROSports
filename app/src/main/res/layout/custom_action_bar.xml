@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/headerActionBar"
-        android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/headerActionBar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/gradient_topbar">
+
+    <ImageView
+        android:id="@+id/imgLeft"
+        style="@style/StyleClickButton"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:padding="16dp"
+        android:visibility="invisible"
+        tools:src="@drawable/ic_back"
+        tools:visibility="visible" />
+
+    <com.example.aerosports.customview.TextViewCSBold
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient_topbar">
+        android:layout_alignBottom="@+id/imgRight"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/_12sdp"
+        android:textColor="@color/white"
+        android:textSize="15dp"
+        tools:text="Title" />
 
     <ImageView
-            android:id="@+id/imgLeft"
-            style="@style/StyleClickButton"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
-            android:padding="16dp"
-            android:visibility="invisible"
-            tools:src="@drawable/ic_back"
-            tools:visibility="visible" />
-
-    <com.example.aerosports.customview.TextViewCSRegular
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/imgRight"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/_12sdp"
-            android:textColor="@color/white"
-            android:textSize="15dp"
-            tools:text="Title" />
-
-    <ImageView
-            android:id="@+id/imgRight"
-            style="@style/StyleClickButton"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
-            android:layout_alignParentRight="true"
-            android:padding="16dp"
-            android:visibility="invisible"
-            tools:src="@drawable/ic_notifi"
-            tools:visibility="visible" />
+        android:id="@+id/imgRight"
+        style="@style/StyleClickButton"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_alignParentRight="true"
+        android:padding="16dp"
+        android:visibility="invisible"
+        tools:src="@drawable/ic_notifi"
+        tools:visibility="visible" />
 
 </RelativeLayout>

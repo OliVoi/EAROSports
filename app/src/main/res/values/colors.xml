@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorPrimary">#93cd28</color>
+    <color name="colorPrimaryDark">#2eba1d</color>
     <color name="colorAccent">#D81B60</color>
 
     <color name="white">#FFFFFF</color>
@@ -26,4 +26,6 @@
     <color name="status_all">#237BD3</color>
     <color name="startColorPrimary">#37B6B1</color>
     <color name="bgr_search_home">#37A29B</color>
+    <color name="color_red">#da2d2a</color>
+    <color name="color_red_dack">#cc0001</color>
 </resources>

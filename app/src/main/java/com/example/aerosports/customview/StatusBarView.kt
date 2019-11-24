@@ -66,11 +66,11 @@ class StatusBarView @JvmOverloads constructor(
     }
 
     fun setClickAction(action: CallBackActionBar) {
-        this.mCall = action;
+        this.mCall = action
     }
 
     interface CallBackActionBar {
-        fun onActionRight();
-        fun onActionLeft();
+        fun onActionRight()
+        fun onActionLeft()
     }
 }
