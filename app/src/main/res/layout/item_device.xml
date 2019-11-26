@@ -1,14 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:padding="@dimen/_10sdp"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_margin="@dimen/_5sdp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="@dimen/_5sdp">
 
-    <com.example.aerosports.customview.TextViewCSBold
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:textSize="@dimen/_12sdp"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:padding="@dimen/_10sdp">
 
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.example.aerosports.customview.TextViewCSBold
+                android:id="@+id/tvNameDevice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/title_status_dialog"
+                android:textSize="@dimen/_12sdp"
+                tools:text="HC - 08" />
+
+            <com.example.aerosports.customview.TextViewCSRegular
+                android:id="@+id/tvCodeDevice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:textColor="@color/title_status_dialog"
+                android:textSize="@dimen/_12sdp"
+                tools:text="00 - 01 -88 - 97" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/colorStatus"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_5sdp"
+            android:layout_alignParentRight="true"
+            android:background="@color/tab_select" />
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>
