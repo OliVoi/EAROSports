@@ -8,10 +8,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,16 +17,18 @@ import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.aerosports.R
-import com.example.aerosports.utils.Constant
 import kotlinx.android.synthetic.main.dialog_scanner.*
-import java.io.IOException
+import me.aflak.bluetooth.Bluetooth
+import me.aflak.bluetooth.interfaces.DiscoveryCallback
 
-class ScannerBluetoothDialog (callBack: CallBackConnectDevice) : DialogFragment(), View.OnClickListener, CallBackDevice {
+class ScannerBluetoothDialog(callBack: CallBackConnectDevice) : DialogFragment(),
+    View.OnClickListener, CallBackDevice {
     private var mIsScanning = false
     private var mListDevice: MutableList<BluetoothDevice> = ArrayList()
     private var mDeviceAdapter: DeviceBluetoothAdapter? = null
     private val mCallBack: CallBackConnectDevice = callBack
     private var mBluetoothAdapter: BluetoothAdapter? = null
+    private var mRegisted: Boolean = false
 
     private val mReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contextDevice: Context?, intentDevice: Intent?) {
@@ -64,15 +64,16 @@ class ScannerBluetoothDialog (callBack: CallBackConnectDevice) : DialogFragment(
     private fun scanning() {
         mIsScanning = !mIsScanning
         if (mIsScanning) {
+            mRegisted = true
             tvScanning.text = "Stop"
             mListDevice = ArrayList()
             ltAnimation.playAnimation()
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
             mBluetoothAdapter?.startDiscovery()
             activity?.registerReceiver(mReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
-            setupViewDevice()
             return
         }
+        mRegisted = false
         tvScanning.text = "Scan"
         ltAnimation.pauseAnimation()
         mBluetoothAdapter?.cancelDiscovery()
@@ -91,7 +92,7 @@ class ScannerBluetoothDialog (callBack: CallBackConnectDevice) : DialogFragment(
     override fun onDestroy() {
         super.onDestroy()
         mBluetoothAdapter?.cancelDiscovery()
-        activity?.unregisterReceiver(mReceiver)
+        if (mRegisted) activity?.unregisterReceiver(mReceiver)
     }
 
     override fun onStart() {

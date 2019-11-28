@@ -6,17 +6,12 @@ import android.app.ProgressDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
-import android.text.Html
-import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.view.View
-import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
@@ -25,13 +20,29 @@ import com.example.aerosports.customview.StatusBarView
 import com.example.aerosports.mainui.dialog.ScannerBluetoothDialog
 import com.example.aerosports.utils.Constant
 import com.example.aerosports.utils.StringUtils
+import com.polidea.rxandroidble2.RxBleClient
+import com.polidea.rxandroidble2.RxBleConnection
+import com.polidea.rxandroidble2.RxBleDevice
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.IOException
 
 
 class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBackActionBar,
     ScannerBluetoothDialog.CallBackConnectDevice {
     private val REQUEST_ENABLE_BT: Int = 197
+    private var mRxBleClient: RxBleClient? = null
+    private var mRxDevice: RxBleDevice? = null
+    private var mDisposable: Disposable? = null
+    private var mRxConnection: RxBleConnection? = null
+    private var connectionObservable: Observable<RxBleConnection>? = null
+
+    private fun prepareConnectionObservable(): Observable<RxBleConnection>? {
+        return mRxDevice
+            ?.establishConnection(false)
+    }
+
     companion object {
         var mBluetoothAdapter: BluetoothAdapter? = null
         var mBluetoothSocket: BluetoothSocket? = null
@@ -50,15 +61,18 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
 
     private fun initView() {
         topBar.setClickAction(this)
+        btnStart.setOnClickListener(this)
+
+        connectionObservable = prepareConnectionObservable()
     }
 
     private fun checkStatusBluetooth(): Boolean {
-        val bluetooth = BluetoothAdapter.getDefaultAdapter()
-        if (bluetooth == null) {
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (mBluetoothAdapter == null) {
             StringUtils.reportMessage(this, getString(R.string.app_bluetooth_not_support))
             return false
         }
-        if (!bluetooth.isEnabled) {
+        if (!mBluetoothAdapter?.isEnabled!!) {
             StringUtils.reportMessage(this, getString(R.string.app_bluetooth_disable))
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
@@ -67,12 +81,19 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
         return true
     }
 
-    private fun checkPermissions(): Boolean{
+    private fun checkPermissions(): Boolean {
         var isPer: Boolean = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Only ask for these permissions on runtime when running Android 6.0 or higher
-            when (ContextCompat.checkSelfPermission(baseContext, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                PackageManager.PERMISSION_DENIED ->{
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 197)
+            when (ContextCompat.checkSelfPermission(
+                baseContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )) {
+                PackageManager.PERMISSION_DENIED -> {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        197
+                    )
                     isPer = false
                 }
                 PackageManager.PERMISSION_GRANTED -> {
@@ -83,10 +104,25 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
         return isPer
     }
 
+    private fun witer() {
+        mRxDevice.let {
+            it?.establishConnection(false)?.flatMapSingle { t: RxBleConnection ->
+                t.writeCharacteristic(Constant.mMyUUID, "hihi".toByteArray())
+            }?.subscribe(
+                Consumer {
+                    Log.e("", "")
+                },
+                Consumer {
+                    Log.e("", "")
+                }
+            )
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != Activity.RESULT_OK) return
-        when(requestCode){
+        when (requestCode) {
             REQUEST_ENABLE_BT -> onActionLeft()
         }
     }
@@ -97,6 +133,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
 
     override fun onActionRight() {
         if (isFinishing || !checkStatusBluetooth()) return
+        disconnect()
     }
 
     override fun onActionLeft() {
@@ -108,46 +145,27 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
 
     override fun onClick(v: View?) {
         when (v?.id) {
-
+            R.id.btnStart -> witer()
         }
     }
 
     override fun onclickConnect(item: BluetoothDevice) {
-        ConnectToDevice(this).execute()
+        mDevice = item
+        mRxBleClient = RxBleClient.create(this)
+        mRxDevice = mRxBleClient?.getBleDevice(mDevice!!.address)
+        mDisposable = mRxDevice?.establishConnection(false)?.subscribe(
+            Consumer {
+                mRxConnection = it
+                Log.e("", "")
+//                StringUtils.reportMessage(this, "Connected")
+            }, Consumer {
+                Log.e("", "")
+//                StringUtils.reportMessage(this, "Connect error" + it.message)
+            }
+        )
     }
 
-    private class ConnectToDevice(c: Context) : AsyncTask<Void, Void, String>() {
-        private var connectSuccess: Boolean = true
-        private val context: Context = c
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-            mProgress = ProgressDialog.show(context, "Connecting...", "please wait")
-        }
-
-        override fun doInBackground(vararg p0: Void?): String? {
-            try {
-                if (mBluetoothSocket == null || !mIsConnected) {
-                    val device: BluetoothDevice = mBluetoothAdapter!!.getRemoteDevice(mDevice?.address)
-                    mBluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(Constant.mMyUUID)
-                    BluetoothAdapter.getDefaultAdapter().cancelDiscovery()
-                    mBluetoothSocket!!.connect()
-                }
-            } catch (e: IOException) {
-                connectSuccess = false
-                e.printStackTrace()
-            }
-            return null
-        }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            if (!connectSuccess) {
-                StringUtils.reportMessage(context, "couldn't connect")
-            } else {
-                mIsConnected = true
-            }
-            mProgress.dismiss()
-        }
+    private fun disconnect() {
+        mDisposable.let { it?.dispose() }
     }
 }
