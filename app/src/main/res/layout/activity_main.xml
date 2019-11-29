@@ -23,7 +23,7 @@
 
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/_35sdp"
+            android:layout_height="@dimen/_60sdp"
             android:layout_marginTop="@dimen/_20sdp"
             android:src="@drawable/logo" />
 
@@ -129,12 +129,13 @@
                     android:src="@drawable/plus" />
 
                 <com.example.aerosports.customview.TextViewDigital
+                    android:id="@+id/tvSpeed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:textColor="@color/color_red"
                     android:textSize="@dimen/_16sdp"
-                    tools:text="0" />
+                    android:text="0" />
 
                 <com.example.aerosports.customview.TextViewCSRegular
                     android:layout_width="wrap_content"
@@ -167,15 +168,16 @@
                     android:layout_width="@dimen/_45sdp"
                     android:layout_height="@dimen/_45sdp"
                     android:padding="@dimen/_5sdp"
-                    android:src="@drawable/plus" />
+                    android:src="@drawable/right" />
 
                 <com.example.aerosports.customview.TextViewDigital
+                    android:id="@+id/tvSpin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:textColor="@color/color_red"
                     android:textSize="@dimen/_16sdp"
-                    tools:text="0" />
+                    android:text="0" />
 
                 <com.example.aerosports.customview.TextViewCSRegular
                     android:layout_width="wrap_content"
@@ -191,7 +193,7 @@
                     android:layout_height="@dimen/_45sdp"
                     android:layout_marginTop="@dimen/_5sdp"
                     android:padding="@dimen/_5sdp"
-                    android:src="@drawable/minus" />
+                    android:src="@drawable/left" />
 
             </LinearLayout>
 
@@ -211,12 +213,13 @@
                     android:src="@drawable/plus" />
 
                 <com.example.aerosports.customview.TextViewDigital
+                    android:id="@+id/tvFeed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:textColor="@color/color_red"
                     android:textSize="@dimen/_16sdp"
-                    tools:text="0" />
+                    android:text="off" />
 
                 <com.example.aerosports.customview.TextViewCSRegular
                     android:layout_width="wrap_content"
@@ -252,12 +255,13 @@
                     android:src="@drawable/plus" />
 
                 <com.example.aerosports.customview.TextViewDigital
+                    android:id="@+id/tvElev"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:textColor="@color/color_red"
                     android:textSize="@dimen/_16sdp"
-                    tools:text="0" />
+                    android:text="0" />
 
                 <com.example.aerosports.customview.TextViewCSRegular
                     android:layout_width="wrap_content"

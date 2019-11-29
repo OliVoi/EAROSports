@@ -2,10 +2,8 @@ package com.example.aerosports
 
 import android.Manifest
 import android.app.Activity
-import android.app.ProgressDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -37,19 +35,25 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     ScannerBluetoothDialog.CallBackConnectDevice {
     private val REQUEST_ENABLE_BT: Int = 197
     private var mRxBleClient: RxBleClient? = null
-    private var mRxDevice: RxBleDevice? = null
     private var mDisposable: Disposable? = null
-    private var mRxConnection: RxBleConnection? = null
-
-    private lateinit var characteristicUuid: UUID
     private val disconnectTriggerSubject = PublishSubject.create<Unit>()
     private lateinit var connectionObservable: Observable<RxBleConnection>
     private val connectionDisposable = CompositeDisposable()
     private lateinit var bleDevice: RxBleDevice
+    private var mBluetoothAdapter: BluetoothAdapter? = null
+    private var mDevice: BluetoothDevice? = null
+    private var mIsConect: Boolean = false
+    private fun triggerDisconnect() = disconnectTriggerSubject.onNext(Unit)
 
-    var mBluetoothAdapter: BluetoothAdapter? = null
-    var mIsConnected: Boolean = false
-    var mDevice: BluetoothDevice? = null
+    // param write
+    private var mStartStop: Int = 0
+    private var mRandom: Int = 0
+    private var mLine2: Int = 0
+    private var mLine3: Int = 0
+    private var mSpeed: Int = 0
+    private var mSpin: Int = 0
+    private var mFeed: Int = 10
+    private var mElev: Int = 0
 
     private fun prepareConnectionObservable(): Observable<RxBleConnection> =
         bleDevice.let {
@@ -69,6 +73,23 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     private fun initView() {
         topBar.setClickAction(this)
         btnStart.setOnClickListener(this)
+        btnRandom.setOnClickListener(this)
+        btnLineTwo.setOnClickListener(this)
+        btnLineThree.setOnClickListener(this)
+        imPlusSpeed.setOnClickListener(this)
+        imMinusSpeed.setOnClickListener(this)
+        imPlusSpin.setOnClickListener(this)
+        imMinusSpin.setOnClickListener(this)
+        imPlusFeed.setOnClickListener(this)
+        imMinusFeed.setOnClickListener(this)
+        imPlusElev.setOnClickListener(this)
+        imMinusElev.setOnClickListener(this)
+    }
+
+    private fun updateUI() {
+        if (mIsConect) {
+            return
+        }
     }
 
     private fun checkStatusBluetooth(): Boolean {
@@ -89,16 +110,8 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     private fun checkPermissions(): Boolean {
         var isPer: Boolean = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Only ask for these permissions on runtime when running Android 6.0 or higher
-            when (ContextCompat.checkSelfPermission(
-                baseContext,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )) {
-                PackageManager.PERMISSION_DENIED -> {
-                    ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                        197
-                    )
+            when (ContextCompat.checkSelfPermission(baseContext, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                PackageManager.PERMISSION_DENIED -> { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 197)
                     isPer = false
                 }
                 PackageManager.PERMISSION_GRANTED -> {
@@ -109,8 +122,22 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
         return isPer
     }
 
-    private fun witer() {
-
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.btnStart -> submitAction(EnumAction.ON_OFF, false)
+            R.id.btnLineTwo -> submitAction(EnumAction.LINE_2, false)
+            R.id.btnLineThree -> submitAction(EnumAction.LINE_3, false)
+            R.id.btnRandom -> submitAction(EnumAction.RANDOM, false)
+            R.id.imMinusSpeed -> submitAction(EnumAction.SPEED, false)
+            R.id.imPlusSpeed -> submitAction(EnumAction.SPEED, true)
+            R.id.imPlusSpin -> submitAction(EnumAction.SPIN, true)
+            R.id.imMinusSpin -> submitAction(EnumAction.SPIN, false)
+            R.id.imPlusFeed -> submitAction(EnumAction.FEED, true)
+            R.id.imMinusFeed -> submitAction(EnumAction.FEED, false)
+            R.id.imPlusElev -> submitAction(EnumAction.ELEV, true)
+            R.id.imMinusElev -> submitAction(EnumAction.ELEV, false)
+            R.id.status -> onReadClick()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -126,26 +153,25 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     }
 
     override fun onActionRight() {
-        if (isFinishing || !checkStatusBluetooth()) return
-        disconnect()
+        if (isFinishing || !checkStatusBluetooth() || !mIsConect) return
+        triggerDisconnect()
     }
 
     override fun onActionLeft() {
-        if (isFinishing || !checkStatusBluetooth() || !checkPermissions()) return
+        if (isFinishing || !checkStatusBluetooth() || !checkPermissions() || mIsConect) return
         val dialog = ScannerBluetoothDialog(this)
         dialog.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.ThemeTranslucentNoStatus)
         dialog.show(supportFragmentManager, "Scanning")
     }
 
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.btnStart -> onWriteClick()
-        }
+    private fun checkConnected(): Boolean{
+        if (!mIsConect) StringUtils.reportMessage(this, getString(R.string.app_bluetooth_no_device))
+        return mIsConect
     }
 
     override fun onclickConnect(item: BluetoothDevice) {
         mDevice = item
-
+        tvDevice.text = mDevice!!.name
         mRxBleClient = RxBleClient.create(this)
         bleDevice = mRxBleClient!!.getBleDevice(mDevice!!.address)
         connectionObservable = prepareConnectionObservable()
@@ -155,81 +181,35 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe {
                 Log.i(javaClass.simpleName, "Connecting...")
+                status.text = getString(R.string.app_bluetooth_connecting)
             }
             .subscribe(
                 {
-                    Log.i(javaClass.simpleName, "Hey, connection has been established!")
+                    mIsConect = true
+                    Log.i(javaClass.simpleName, "Connected!")
+                    status.text = getString(R.string.app_bluetooth_connected)
+                    updateUI()
                 },
                 {
+                    mIsConect = false
+                    updateUI()
+                    status.text = it.message
                     Log.i(javaClass.simpleName, "error!")
                 },
                 {
-                    Log.i(javaClass.simpleName, "ok!")
-                }
-            )
-            .let { connectionDisposable.add(it) }
-
-        // connect ok
-//        mRxBleClient = RxBleClient.create(this)
-//        bleDevice = mRxBleClient!!.getBleDevice(mDevice!!.address)
-//        bleDevice.observeConnectionStateChanges()
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe {
-//                Log.i(javaClass.simpleName, "Connecting...")
-//            }
-//            .let { mDisposable = it }
-//
-//        bleDevice!!.establishConnection(false)
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .doFinally {
-//                Log.i(javaClass.simpleName, "Connecting...")
-//            }
-//            .subscribe({
-//                Log.i(javaClass.simpleName, "Connecting...")
-//            }, {
-//                onConnectionFailure(it)
-//            })
-//            .let { mDisposable = it }
-
-//        mRxDevice = mRxBleClient?.getBleDevice(mDevice!!.address)
-//        connectionObservable = prepareConnectionObservable()
-//        onConnectToggleClick()
-
-//        mRxDevice = mRxBleClient?.getBleDevice(mDevice!!.address)
-//        mDisposable = mRxDevice?.establishConnection(false)?.subscribe(
-//            Consumer {
-//                mRxConnection = it
-//                Log.e("", "")
-//            }, Consumer {
-//                Log.e("", "")
-//            }
-//        )
-    }
-
-    private fun onConnectToggleClick() {
-        connectionObservable
-            .flatMapSingle { it.discoverServices() }
-            .flatMapSingle { it.getCharacteristic(Constant.mMyUUID) }
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { Log.i(javaClass.simpleName, "Connecting...") }
-            .subscribe(
-                {
-                    Log.i(javaClass.simpleName, "Hey, connection has been established!")
-                },
-                {
-                    onConnectionFailure(it)
-                },
-                {
-                    Log.i(javaClass.simpleName, "gì đó!")
+                    mIsConect = false
+                    updateUI()
+                    Log.i(javaClass.simpleName, "disconect ok!")
+                    status.text = getString(R.string.app_bluetooth_disconnect)
                 }
             )
             .let { connectionDisposable.add(it) }
     }
 
-    private fun onWriteClick() {
+    private fun onWriteClick(terminate: String) {
         connectionObservable
             .firstOrError()
-            .flatMap { it.writeCharacteristic(characteristicUuid, "hihi".toByteArray()) }
+            .flatMap { it.writeCharacteristic(Constant.mMyUUID, terminate.toByteArray()) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 Log.i(javaClass.simpleName, "write ok")
@@ -239,11 +219,94 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             .let { connectionDisposable.add(it) }
     }
 
-    private fun onConnectionFailure(throwable: Throwable) {
-        Log.i(javaClass.simpleName, "error!" + throwable.message)
+    private fun onReadClick() {
+        if (!checkConnected()) return
+            connectionObservable
+                .firstOrError()
+                .flatMap { it.readCharacteristic(Constant.mMyUUID) }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    Log.i(javaClass.simpleName, "Read ok")
+                }, {
+                    Log.i(javaClass.simpleName, "Read fail")
+                })
+                .let { connectionDisposable.add(it) }
     }
 
-    private fun disconnect() {
-        mDisposable.let { it?.dispose() }
+    private fun submitAction(enumAction: EnumAction, isPlus: Boolean) {
+        if (!checkConnected()) return
+        when (enumAction) {
+            //On / off
+            EnumAction.ON_OFF -> {
+                mStartStop = if (mStartStop == 1) 0 else 1
+                btnStart.text = if (mStartStop == 1) "Stop" else "Start"
+                onWriteClick(StringUtils.baseStop + mStartStop)
+            }
+            // Random
+            EnumAction.RANDOM -> {
+                mRandom = (0..5).random()
+                onWriteClick(StringUtils.baseRandom + mRandom)
+            }
+            // Line 2
+            EnumAction.LINE_2 -> actionLine(2)
+            // Line 2
+            EnumAction.LINE_3 -> actionLine(3)
+            // Speed
+            EnumAction.SPEED -> {
+                if ((isPlus && mSpeed == 9) || (!isPlus && mSpeed == 0)) return
+                mSpeed = if (isPlus) mSpeed + 1 else mSpeed - 1
+                tvSpeed.text = mSpeed.toString()
+                onWriteClick(StringUtils.baseSpeed + mSpeed)
+            }
+            // Spin
+            EnumAction.SPIN -> {
+                if ((isPlus && mSpin == 3) || (!isPlus && mSpin == 0)) return
+                mSpin = if (isPlus) mSpin + 1 else mSpin - 1
+                tvSpin.text = mSpin.toString()
+                onWriteClick(StringUtils.baseSpin + mSpin)
+            }
+            // Feed
+            EnumAction.FEED -> {
+                if ((isPlus && mFeed == 2) || (!isPlus && mFeed == 10)) return
+                mFeed = if (isPlus) mFeed - 1 else mFeed + 1
+                tvFeed.text = if (mFeed == 10) "off" else mFeed.toString() + "s"
+                onWriteClick(StringUtils.baseFeed + (10 - mFeed))
+            }
+            // Elev
+            EnumAction.ELEV -> {
+                if ((isPlus && mElev == 1) || (!isPlus && mElev == 0)) return
+                mElev = if (isPlus) mElev + 1 else mElev - 1
+                tvElev.text = mElev.toString()
+                onWriteClick(StringUtils.baseElev + mElev)
+            }
+        }
+    }
+
+    private fun actionLine(typeLine: Int){
+        when(typeLine){
+            2 -> {
+                mLine2 = if (mLine2 == 0) 1 else 0
+                onWriteClick(StringUtils.baseLine2 + mLine2)
+            }
+            3 -> {
+                mLine3 = if (mLine3 == 0) 1 else 0
+                onWriteClick(StringUtils.baseLine3 + mLine3)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {197 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    onActionLeft()
+                }
+            }
+        }
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        connectionDisposable.clear()
     }
 }
