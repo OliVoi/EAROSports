@@ -20,13 +20,17 @@ import com.example.aerosports.customview.StatusBarView
 import com.example.aerosports.mainui.dialog.ScannerBluetoothDialog
 import com.example.aerosports.utils.Constant
 import com.example.aerosports.utils.StringUtils
+import com.jakewharton.rx.ReplayingShare
 import com.polidea.rxandroidble2.RxBleClient
 import com.polidea.rxandroidble2.RxBleConnection
 import com.polidea.rxandroidble2.RxBleDevice
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
+import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
 class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBackActionBar,
@@ -36,20 +40,23 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     private var mRxDevice: RxBleDevice? = null
     private var mDisposable: Disposable? = null
     private var mRxConnection: RxBleConnection? = null
-    private var connectionObservable: Observable<RxBleConnection>? = null
 
-    private fun prepareConnectionObservable(): Observable<RxBleConnection>? {
-        return mRxDevice
-            ?.establishConnection(false)
-    }
+    private lateinit var characteristicUuid: UUID
+    private val disconnectTriggerSubject = PublishSubject.create<Unit>()
+    private lateinit var connectionObservable: Observable<RxBleConnection>
+    private val connectionDisposable = CompositeDisposable()
+    private lateinit var bleDevice: RxBleDevice
 
-    companion object {
-        var mBluetoothAdapter: BluetoothAdapter? = null
-        var mBluetoothSocket: BluetoothSocket? = null
-        lateinit var mProgress: ProgressDialog
-        var mIsConnected: Boolean = false
-        var mDevice: BluetoothDevice? = null
-    }
+    var mBluetoothAdapter: BluetoothAdapter? = null
+    var mIsConnected: Boolean = false
+    var mDevice: BluetoothDevice? = null
+
+    private fun prepareConnectionObservable(): Observable<RxBleConnection> =
+        bleDevice.let {
+            it!!.establishConnection(false)
+                .takeUntil(disconnectTriggerSubject)
+                .compose(ReplayingShare.instance())
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,8 +69,6 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     private fun initView() {
         topBar.setClickAction(this)
         btnStart.setOnClickListener(this)
-
-        connectionObservable = prepareConnectionObservable()
     }
 
     private fun checkStatusBluetooth(): Boolean {
@@ -105,18 +110,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     }
 
     private fun witer() {
-        mRxDevice.let {
-            it?.establishConnection(false)?.flatMapSingle { t: RxBleConnection ->
-                t.writeCharacteristic(Constant.mMyUUID, "hihi".toByteArray())
-            }?.subscribe(
-                Consumer {
-                    Log.e("", "")
-                },
-                Consumer {
-                    Log.e("", "")
-                }
-            )
-        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -145,24 +139,108 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
 
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.btnStart -> witer()
+            R.id.btnStart -> onWriteClick()
         }
     }
 
     override fun onclickConnect(item: BluetoothDevice) {
         mDevice = item
+
         mRxBleClient = RxBleClient.create(this)
-        mRxDevice = mRxBleClient?.getBleDevice(mDevice!!.address)
-        mDisposable = mRxDevice?.establishConnection(false)?.subscribe(
-            Consumer {
-                mRxConnection = it
-                Log.e("", "")
-//                StringUtils.reportMessage(this, "Connected")
-            }, Consumer {
-                Log.e("", "")
-//                StringUtils.reportMessage(this, "Connect error" + it.message)
+        bleDevice = mRxBleClient!!.getBleDevice(mDevice!!.address)
+        connectionObservable = prepareConnectionObservable()
+        connectionObservable
+            .flatMapSingle { it.discoverServices() }
+            .flatMapSingle { it.getCharacteristic(Constant.mMyUUID) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe {
+                Log.i(javaClass.simpleName, "Connecting...")
             }
-        )
+            .subscribe(
+                {
+                    Log.i(javaClass.simpleName, "Hey, connection has been established!")
+                },
+                {
+                    Log.i(javaClass.simpleName, "error!")
+                },
+                {
+                    Log.i(javaClass.simpleName, "ok!")
+                }
+            )
+            .let { connectionDisposable.add(it) }
+
+        // connect ok
+//        mRxBleClient = RxBleClient.create(this)
+//        bleDevice = mRxBleClient!!.getBleDevice(mDevice!!.address)
+//        bleDevice.observeConnectionStateChanges()
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribe {
+//                Log.i(javaClass.simpleName, "Connecting...")
+//            }
+//            .let { mDisposable = it }
+//
+//        bleDevice!!.establishConnection(false)
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .doFinally {
+//                Log.i(javaClass.simpleName, "Connecting...")
+//            }
+//            .subscribe({
+//                Log.i(javaClass.simpleName, "Connecting...")
+//            }, {
+//                onConnectionFailure(it)
+//            })
+//            .let { mDisposable = it }
+
+//        mRxDevice = mRxBleClient?.getBleDevice(mDevice!!.address)
+//        connectionObservable = prepareConnectionObservable()
+//        onConnectToggleClick()
+
+//        mRxDevice = mRxBleClient?.getBleDevice(mDevice!!.address)
+//        mDisposable = mRxDevice?.establishConnection(false)?.subscribe(
+//            Consumer {
+//                mRxConnection = it
+//                Log.e("", "")
+//            }, Consumer {
+//                Log.e("", "")
+//            }
+//        )
+    }
+
+    private fun onConnectToggleClick() {
+        connectionObservable
+            .flatMapSingle { it.discoverServices() }
+            .flatMapSingle { it.getCharacteristic(Constant.mMyUUID) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { Log.i(javaClass.simpleName, "Connecting...") }
+            .subscribe(
+                {
+                    Log.i(javaClass.simpleName, "Hey, connection has been established!")
+                },
+                {
+                    onConnectionFailure(it)
+                },
+                {
+                    Log.i(javaClass.simpleName, "gì đó!")
+                }
+            )
+            .let { connectionDisposable.add(it) }
+    }
+
+    private fun onWriteClick() {
+        connectionObservable
+            .firstOrError()
+            .flatMap { it.writeCharacteristic(characteristicUuid, "hihi".toByteArray()) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                Log.i(javaClass.simpleName, "write ok")
+            }, {
+                Log.i(javaClass.simpleName, "write error")
+            })
+            .let { connectionDisposable.add(it) }
+    }
+
+    private fun onConnectionFailure(throwable: Throwable) {
+        Log.i(javaClass.simpleName, "error!" + throwable.message)
     }
 
     private fun disconnect() {

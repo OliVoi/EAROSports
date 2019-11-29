@@ -18,8 +18,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.aerosports.R
 import kotlinx.android.synthetic.main.dialog_scanner.*
-import me.aflak.bluetooth.Bluetooth
-import me.aflak.bluetooth.interfaces.DiscoveryCallback
 
 class ScannerBluetoothDialog(callBack: CallBackConnectDevice) : DialogFragment(),
     View.OnClickListener, CallBackDevice {
