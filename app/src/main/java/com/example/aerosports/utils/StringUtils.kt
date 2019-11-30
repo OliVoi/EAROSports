@@ -11,13 +11,13 @@ class StringUtils {
     companion object {
         @JvmStatic
         val baseStop: String = "st"
-        val baseRandom: String = "ASrd"
-        val baseLine2: String = "ASo2"
-        val baseLine3: String = "ASo3"
-        val baseSpeed: String = "ASsp"
-        val baseSpin: String = "ASsn"
-        val baseFeed: String = "ASfr"
-        val baseElev: String = "ASel"
+        const val baseRandom: String = "ASrd"
+        const val baseLine2: String = "ASo2"
+        const val baseLine3 = "ASo3"
+        const val baseSpeed: String = "ASsp"
+        const val baseSpin: String = "ASsn"
+        const val baseFeed: String = "ASfr"
+        const val baseElev: String = "ASel"
 
         fun setCustomFont(ctx: Context, path: String): Typeface? {
             var tf: Typeface? = null
