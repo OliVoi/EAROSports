@@ -240,6 +240,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             EnumAction.ON_OFF -> {
                 mStartStop = if (mStartStop == 1) 0 else 1
                 btnStart.text = if (mStartStop == 1) "Stop" else "Start"
+                btnStart.setBackgroundResource(if (mStartStop == 1) R.drawable.bgr_btn_red else R.drawable.bgr_btn_start)
                 onWriteClick(StringUtils.baseStop + mStartStop)
             }
             // Random
@@ -249,7 +250,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             }
             // Line 2
             EnumAction.LINE_2 -> actionLine(2)
-            // Line 2
+            // Line 3
             EnumAction.LINE_3 -> actionLine(3)
             // Speed
             EnumAction.SPEED -> {
@@ -282,17 +283,25 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
         }
     }
 
-    private fun actionLine(typeLine: Int){
-        when(typeLine){
+    private fun actionLine(typeLine: Int) {
+        when (typeLine) {
             2 -> {
                 mLine2 = if (mLine2 == 0) 1 else 0
+                btnRandom.setBackgroundResource(if (mLine2 == 0) R.drawable.bgr_selected else R.color.white)
                 onWriteClick(StringUtils.baseLine2 + mLine2)
             }
             3 -> {
                 mLine3 = if (mLine3 == 0) 1 else 0
+                btnRandom.setBackgroundResource(if (mLine3 == 0) R.drawable.bgr_selected else R.color.white)
                 onWriteClick(StringUtils.baseLine3 + mLine3)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (mDevice == null || mIsConect) return
+        onclickConnect(mDevice!!)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -303,10 +312,10 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             }
         }
     }
-
-
-    override fun onPause() {
-        super.onPause()
-        connectionDisposable.clear()
-    }
+//
+//
+//    override fun onPause() {
+//        super.onPause()
+//        connectionDisposable.clear()
+//    }
 }

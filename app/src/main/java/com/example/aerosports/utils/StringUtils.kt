@@ -10,7 +10,7 @@ import android.widget.Toast
 class StringUtils {
     companion object {
         @JvmStatic
-        val baseStop: String = "st"
+        val baseStop: String = "ASst"
         const val baseRandom: String = "ASrd"
         const val baseLine2: String = "ASo2"
         const val baseLine3 = "ASo3"

@@ -28,4 +28,5 @@
     <color name="bgr_search_home">#37A29B</color>
     <color name="color_red">#da2d2a</color>
     <color name="color_red_dack">#cc0001</color>
+    <color name="color_selected">#33565C64</color>
 </resources>
