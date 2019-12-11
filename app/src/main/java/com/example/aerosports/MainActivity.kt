@@ -52,6 +52,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     private var mLine3: Int = 0
     private var mSpeed: Int = 0
     private var mSpin: Int = 0
+    private var mSpinValue: Int = 0
     private var mFeed: Int = 10
     private var mElev: Int = 0
 
@@ -201,6 +202,8 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
                     updateUI()
                     Log.i(javaClass.simpleName, "disconect ok!")
                     status.text = getString(R.string.app_bluetooth_disconnect)
+                    finish()
+                    startActivity(intent)
                 }
             )
             .let { connectionDisposable.add(it) }
@@ -246,6 +249,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             // Random
             EnumAction.RANDOM -> {
                 mRandom = (0..5).random()
+//                btnRandom.setBackgroundResource(if (mLine2 == 0) R.drawable.bgr_selected else R.color.white)
                 onWriteClick(StringUtils.baseRandom + mRandom)
             }
             // Line 2
@@ -261,9 +265,27 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             }
             // Spin
             EnumAction.SPIN -> {
-                if ((isPlus && mSpin == 3) || (!isPlus && mSpin == 0)) return
-                mSpin = if (isPlus) mSpin + 1 else mSpin - 1
-                tvSpin.text = mSpin.toString()
+                if ((isPlus && mSpin == 6) || (!isPlus && mSpin == 1)) return
+                mSpinValue = if (isPlus) mSpinValue + 1 else mSpinValue - 1
+                if (isPlus && mSpinValue == 0) {
+                    mSpinValue += 1
+                }
+                if (!isPlus && mSpinValue == 0) {
+                    mSpinValue -= 1
+                }
+                if (isPlus && mSpin != 0) {
+                    mSpin += 1
+                }
+                if (!isPlus && mSpin != 0) {
+                    mSpin -= 1
+                }
+                if (isPlus && mSpin == 0) {
+                    mSpin += 4
+                }
+                if (!isPlus && mSpin == 0) {
+                    mSpin += 3
+                }
+                tvSpin.text = mSpinValue.toString()
                 onWriteClick(StringUtils.baseSpin + mSpin)
             }
             // Feed
@@ -287,12 +309,12 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
         when (typeLine) {
             2 -> {
                 mLine2 = if (mLine2 == 0) 1 else 0
-                btnRandom.setBackgroundResource(if (mLine2 == 0) R.drawable.bgr_selected else R.color.white)
+                btnLineTwo.setBackgroundResource(if (mLine2 != 0) R.drawable.bgr_selected else R.color.white)
                 onWriteClick(StringUtils.baseLine2 + mLine2)
             }
             3 -> {
                 mLine3 = if (mLine3 == 0) 1 else 0
-                btnRandom.setBackgroundResource(if (mLine3 == 0) R.drawable.bgr_selected else R.color.white)
+                btnLineThree.setBackgroundResource(if (mLine3 != 0) R.drawable.bgr_selected else R.color.white)
                 onWriteClick(StringUtils.baseLine3 + mLine3)
             }
         }
