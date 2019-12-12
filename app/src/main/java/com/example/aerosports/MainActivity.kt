@@ -248,8 +248,16 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             }
             // Random
             EnumAction.RANDOM -> {
-                mRandom = (0..5).random()
-//                btnRandom.setBackgroundResource(if (mLine2 == 0) R.drawable.bgr_selected else R.color.white)
+                var image = 0
+                mRandom += 1
+                if (mRandom > 5) mRandom = 0
+                if (mRandom == 0) image = R.drawable.ic_back
+                if (mRandom == 1) image = R.drawable.ic_back
+                if (mRandom == 2) image = R.drawable.ic_back
+                if (mRandom == 3) image = R.drawable.ic_back
+                if (mRandom == 4) image = R.drawable.ic_back
+                if (mRandom == 5) image = R.drawable.ic_back
+                imRandom.setImageResource(image)
                 onWriteClick(StringUtils.baseRandom + mRandom)
             }
             // Line 2
@@ -267,12 +275,12 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             EnumAction.SPIN -> {
                 if ((isPlus && mSpin == 6) || (!isPlus && mSpin == 1)) return
                 mSpinValue = if (isPlus) mSpinValue + 1 else mSpinValue - 1
-                if (isPlus && mSpinValue == 0) {
-                    mSpinValue += 1
-                }
-                if (!isPlus && mSpinValue == 0) {
-                    mSpinValue -= 1
-                }
+//                if (isPlus && mSpinValue == 0) {
+//                    mSpinValue += 1
+//                }
+//                if (!isPlus && mSpinValue == 0) {
+//                    mSpinValue -= 1
+//                }
                 if (isPlus && mSpin != 0) {
                     mSpin += 1
                 }
@@ -285,6 +293,7 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
                 if (!isPlus && mSpin == 0) {
                     mSpin += 3
                 }
+                if (mSpinValue == 0) mSpin = 0
                 tvSpin.text = mSpinValue.toString()
                 onWriteClick(StringUtils.baseSpin + mSpin)
             }
@@ -308,12 +317,16 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
     private fun actionLine(typeLine: Int) {
         when (typeLine) {
             2 -> {
+                mLine3 = 0
                 mLine2 = if (mLine2 == 0) 1 else 0
+                btnLineThree.setBackgroundResource(R.color.white)
                 btnLineTwo.setBackgroundResource(if (mLine2 != 0) R.drawable.bgr_selected else R.color.white)
                 onWriteClick(StringUtils.baseLine2 + mLine2)
             }
             3 -> {
+                mLine2 = 0
                 mLine3 = if (mLine3 == 0) 1 else 0
+                btnLineTwo.setBackgroundResource(R.color.white)
                 btnLineThree.setBackgroundResource(if (mLine3 != 0) R.drawable.bgr_selected else R.color.white)
                 onWriteClick(StringUtils.baseLine3 + mLine3)
             }
