@@ -87,12 +87,6 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
         imMinusElev.setOnClickListener(this)
     }
 
-    private fun updateUI() {
-        if (mIsConect) {
-            return
-        }
-    }
-
     private fun checkStatusBluetooth(): Boolean {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if (mBluetoothAdapter == null) {
@@ -187,19 +181,18 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             .subscribe(
                 {
                     mIsConect = true
+                    topBar.setImageRight(getDrawable(R.drawable.ic_plugin_connected))
                     Log.i(javaClass.simpleName, "Connected!")
                     status.text = getString(R.string.app_bluetooth_connected)
-                    updateUI()
                 },
                 {
                     mIsConect = false
-                    updateUI()
                     status.text = it.message
                     Log.i(javaClass.simpleName, "error!")
                 },
                 {
                     mIsConect = false
-                    updateUI()
+                    topBar.setImageRight(getDrawable(R.drawable.ic_plugin_out))
                     Log.i(javaClass.simpleName, "disconect ok!")
                     status.text = getString(R.string.app_bluetooth_disconnect)
                     finish()
@@ -251,12 +244,12 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
                 var image = 0
                 mRandom += 1
                 if (mRandom > 5) mRandom = 0
-                if (mRandom == 0) image = R.drawable.ic_back
-                if (mRandom == 1) image = R.drawable.ic_back
-                if (mRandom == 2) image = R.drawable.ic_back
-                if (mRandom == 3) image = R.drawable.ic_back
-                if (mRandom == 4) image = R.drawable.ic_back
-                if (mRandom == 5) image = R.drawable.ic_back
+                if (mRandom == 0) image = R.drawable.ic_dot_0
+                if (mRandom == 1) image = R.drawable.ic_dot_1
+                if (mRandom == 2) image = R.drawable.ic_dot_2
+                if (mRandom == 3) image = R.drawable.ic_dot_3
+                if (mRandom == 4) image = R.drawable.ic_dot_4
+                if (mRandom == 5) image = R.drawable.ic_dot_5
                 imRandom.setImageResource(image)
                 onWriteClick(StringUtils.baseRandom + mRandom)
             }
