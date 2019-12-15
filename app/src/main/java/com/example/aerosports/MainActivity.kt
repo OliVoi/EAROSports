@@ -299,7 +299,10 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             }
             // Elev
             EnumAction.ELEV -> {
-                if ((isPlus && mElev == 1) || (!isPlus && mElev == 0)) return
+                if ((isPlus && mElev == 1) || (!isPlus && mElev == 0)) {
+                    onWriteClick(StringUtils.baseElev + mElev)
+                    return
+                }
                 mElev = if (isPlus) mElev + 1 else mElev - 1
                 tvElev.text = mElev.toString()
                 onWriteClick(StringUtils.baseElev + mElev)
