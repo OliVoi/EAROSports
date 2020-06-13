@@ -259,14 +259,14 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
             EnumAction.LINE_3 -> actionLine(3)
             // Speed
             EnumAction.SPEED -> {
-                if ((isPlus && mSpeed == 9) || (!isPlus && mSpeed == 0)) return
+                if ((isPlus && mSpeed == 20) || (!isPlus && mSpeed == 0)) return
                 mSpeed = if (isPlus) mSpeed + 1 else mSpeed - 1
                 tvSpeed.text = mSpeed.toString()
                 onWriteClick(StringUtils.baseSpeed + mSpeed)
             }
             // Spin
             EnumAction.SPIN -> {
-                if ((isPlus && mSpin == 6) || (!isPlus && mSpin == 1)) return
+                if ((isPlus && mSpin == 20) || (!isPlus && mSpin == 1)) return
                 mSpinValue = if (isPlus) mSpinValue + 1 else mSpinValue - 1
 //                if (isPlus && mSpinValue == 0) {
 //                    mSpinValue += 1
@@ -275,16 +275,16 @@ class MainActivity : BaseActivity(), View.OnClickListener, StatusBarView.CallBac
 //                    mSpinValue -= 1
 //                }
                 if (isPlus && mSpin != 0) {
-                    mSpin += 1
+                    mSpin ++
                 }
                 if (!isPlus && mSpin != 0) {
-                    mSpin -= 1
+                    mSpin --
                 }
                 if (isPlus && mSpin == 0) {
-                    mSpin += 4
+                    mSpin += 11
                 }
                 if (!isPlus && mSpin == 0) {
-                    mSpin += 3
+                    mSpin += 10
                 }
                 if (mSpinValue == 0) mSpin = 0
                 tvSpin.text = mSpinValue.toString()
