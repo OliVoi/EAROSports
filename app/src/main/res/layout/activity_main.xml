@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         app:action_icon_left="@drawable/ic_scanning"
         app:action_icon_right="@drawable/ic_plugin_out"
-        app:action_text="AEROSports" />
+        app:action_text="AERO SPORTS" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -81,7 +81,7 @@
                             android:id="@+id/imLineTwo"
                             android:layout_width="@dimen/_50sdp"
                             android:layout_height="@dimen/_50sdp"
-                            android:src="@drawable/drills" />
+                            android:src="@drawable/twoline" />
 
                         <com.example.aerosports.customview.TextViewCSRegular
                             android:layout_width="wrap_content"
