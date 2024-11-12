@@ -1,3 +1,11 @@
 <resources>
+    <!--Application-->
     <string name="app_name">AEROSports</string>
+    <string name="app_click_to_back">Click BACK again to exit!</string>
+    <string name="app_bluetooth_disable">Bluetooth is disabled!</string>
+    <string name="app_bluetooth_not_support">The device does not support bluetooth!</string>
+    <string name="app_bluetooth_no_device">No device connected!</string>
+    <string name="app_bluetooth_connecting">Connecting...</string>
+    <string name="app_bluetooth_connected">Connected</string>
+    <string name="app_bluetooth_disconnect">Disconnect</string>
 </resources>
